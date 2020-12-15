@@ -27,6 +27,8 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+# add pods for desired Firebase products
+# https://firebase.google.com/docs/ios/setup#available-pods
 pod 'Firebase/MLVisionBarcodeModel'
 
 target 'Runner' do
