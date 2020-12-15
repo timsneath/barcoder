@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'scanner.dart';
 
 void main() {
   runApp(BarcoderApp());
@@ -23,6 +22,6 @@ class BarcoderPage extends StatefulWidget {
 class _BarcoderPageState extends State<BarcoderPage> {
   @override
   Widget build(BuildContext context) {
-    return MaterialBarcodeScanner();
+    return Container();
   }
 }

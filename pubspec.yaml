@@ -11,9 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.1
-  camera: ^0.5.8+17
-  firebase_ml_vision: ^0.9.10
-  path_provider: ^1.6.24
 
 flutter:
   uses-material-design: true

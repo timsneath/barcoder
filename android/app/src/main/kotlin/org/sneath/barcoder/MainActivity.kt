@@ -1,4 +1,4 @@
-package com.example.barcoder
+package org.sneath.barcoder
 
 import io.flutter.embedding.android.FlutterActivity
 

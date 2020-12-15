@@ -8,7 +8,7 @@
 PRODUCT_NAME = barcoder
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.barcoder
+PRODUCT_BUNDLE_IDENTIFIER = org.sneath.barcoder
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2020 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2020 org.sneath. All rights reserved.
