@@ -27,9 +27,9 @@ class BarcoderPage extends StatefulWidget {
 class _BarcoderPageState extends State<BarcoderPage> {
   String _scanBarcode = 'Unknown';
 
-  startBarcodeScanStream() async {
+  Future<void> startBarcodeScanStream() async {
     FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            "#ff6666", "Cancel", true, ScanMode.BARCODE)
+            '#ff6666', 'Cancel', true, ScanMode.BARCODE)
         .listen((barcode) => print(barcode));
   }
 
@@ -38,7 +38,7 @@ class _BarcoderPageState extends State<BarcoderPage> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666", "Cancel", true, ScanMode.QR);
+          '#ff6666', 'Cancel', true, ScanMode.QR);
       print(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
@@ -60,7 +60,7 @@ class _BarcoderPageState extends State<BarcoderPage> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666", "Cancel", true, ScanMode.BARCODE);
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
       print(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
@@ -90,13 +90,13 @@ class _BarcoderPageState extends State<BarcoderPage> {
                       children: <Widget>[
                         RaisedButton(
                             onPressed: () => scanBarcodeNormal(),
-                            child: Text("Start barcode scan")),
+                            child: Text('Start barcode scan')),
                         RaisedButton(
                             onPressed: () => scanQR(),
-                            child: Text("Start QR scan")),
+                            child: Text('Start QR scan')),
                         RaisedButton(
                             onPressed: () => startBarcodeScanStream(),
-                            child: Text("Start barcode scan stream")),
+                            child: Text('Start barcode scan stream')),
                         Text('Scan result : $_scanBarcode\n',
                             style: TextStyle(fontSize: 20))
                       ]));
