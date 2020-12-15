@@ -15,11 +15,5 @@ dependencies:
   firebase_ml_vision: ^0.9.10
   path_provider: ^1.6.24
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  integration_test:
-    sdk: flutter
-
 flutter:
   uses-material-design: true
