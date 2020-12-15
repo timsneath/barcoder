@@ -87,7 +87,7 @@ class _BarcoderPageState extends State<BarcoderPage> {
                   child: Flex(
                       direction: Axis.vertical,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
+                      children: [
                         RaisedButton(
                             onPressed: () => scanBarcodeNormal(),
                             child: Text('Start barcode scan')),
