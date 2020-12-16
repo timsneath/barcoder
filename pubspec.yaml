@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.1
   flutter_barcode_scanner: ^1.0.1
+  http: ^0.12.2
+  googleapis: ^0.56.1
   
 dev_dependencies:
   pedantic: ^1.9.2
