@@ -7,7 +7,7 @@ const bookshelf = <String>[
   '9781524763169',
   '9781250209764',
   '9780593230251',
-  '9780593229354',
+  '9781984801258',
   '9780385543767',
   '9780735216723',
   '9780385348713',
@@ -35,15 +35,25 @@ class BookTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bookThumbnail = book.imageLinks?.smallThumbnail;
-
-    return ListTile(
-      leading: bookThumbnail != null
-          ? Image.network(bookThumbnail)
-          : const Icon(Icons.book),
-      title: Text(book.title),
-      subtitle: Text(book.authors.first),
-    );
+    if (book == null) {
+      return ListTile();
+    } else {
+      return Card(
+        child: InkWell(
+          splashColor: Colors.blue.withAlpha(30),
+          onTap: () {
+            print('Card tapped.');
+          },
+          child: ListTile(
+            leading: book.imageLinks.thumbnail != null
+                ? Image.network(book.imageLinks.thumbnail)
+                : const Icon(Icons.book),
+            title: book.title != null ? Text(book.title) : '[Unknown]',
+            subtitle: Text(book.authors.join(', ')),
+          ),
+        ),
+      );
+    }
   }
 }
 
@@ -59,14 +69,20 @@ class _BooksPageState extends State<BooksPage> {
       appBar: AppBar(
         title: Text('Books'),
       ),
-      body: FutureBuilder(
-        future: GoogleBook().getBook(isbn: bookshelf[0]),
-        builder: (context, AsyncSnapshot<VolumeVolumeInfo> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return BookTile(snapshot.data);
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
+      body: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: bookshelf.length,
+        itemBuilder: (BuildContext context, int index) {
+          return FutureBuilder(
+            future: GoogleBook().getBook(isbn: bookshelf[index]),
+            builder: (context, AsyncSnapshot<VolumeVolumeInfo> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return BookTile(snapshot.data);
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          );
         },
       ),
     );
