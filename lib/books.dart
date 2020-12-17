@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/books/v1.dart';
 
+import 'bookdetails.dart';
+
 const bookshelf = <String>[
   '9780525536291',
   '9781524763169',
@@ -42,7 +44,14 @@ class BookTile extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.blue.withAlpha(30),
           onTap: () {
-            print('Card tapped.');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return BookDetailsPage();
+                },
+              ),
+            );
           },
           child: ListTile(
             leading: book.imageLinks.thumbnail != null
