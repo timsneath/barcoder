@@ -1,3 +1,4 @@
+import 'package:barcoder/barcoder.dart';
 import 'package:barcoder/bookdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart';
@@ -10,16 +11,22 @@ void main() {
 
 class BarcoderApp extends StatefulWidget {
   @override
-  _BarcoderAppState createState() => _BarcoderAppState();
+  BarcoderAppState createState() => BarcoderAppState();
 }
 
-class _BarcoderAppState extends State<BarcoderApp> {
+class BarcoderAppState extends State<BarcoderApp> {
   VolumeVolumeInfo _selectedBook;
+  bool isScanning = false;
 
   void _handleBookTapped(VolumeVolumeInfo book) {
     setState(() {
       _selectedBook = book;
     });
+  }
+
+  void _handleBarcodeScanned(String barcode) {
+    // add to bookshelf
+    print(barcode);
   }
 
   @override
@@ -40,6 +47,10 @@ class _BarcoderAppState extends State<BarcoderApp> {
               key: ValueKey(_selectedBook),
               child: BookDetailsPage(book: _selectedBook),
             ),
+          if (isScanning != false)
+            MaterialPage(
+                key: ValueKey('ScanningPage'),
+                child: BarcoderPage(onBarcodeScanned: _handleBarcodeScanned))
         ],
         onPopPage: (route, result) {
           if (!route.didPop(result)) {
@@ -47,7 +58,12 @@ class _BarcoderAppState extends State<BarcoderApp> {
           }
 
           setState(() {
-            _selectedBook = null;
+            if (isScanning == true) {
+              isScanning = false;
+            }
+            if (_selectedBook != null) {
+              _selectedBook = null;
+            }
           });
           return true;
         },

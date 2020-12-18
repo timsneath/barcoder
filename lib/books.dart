@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/books/v1.dart';
 
+import 'main.dart';
+
 const bookshelf = <String>[
   '9780525536291',
   '9781524763169',
@@ -66,12 +68,17 @@ class BookTile extends StatelessWidget {
   }
 }
 
-class BooksPage extends StatelessWidget {
+class BooksPage extends StatefulWidget {
   final List<String> books;
   final ValueChanged<VolumeVolumeInfo> onTapped;
 
   BooksPage({@required this.books, @required this.onTapped});
 
+  @override
+  _BooksPageState createState() => _BooksPageState();
+}
+
+class _BooksPageState extends State<BooksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +95,7 @@ class BooksPage extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.done) {
                 return BookTile(
                   book: snapshot.data,
-                  onTapped: onTapped,
+                  onTapped: widget.onTapped,
                 );
               } else {
                 return Center(
@@ -99,6 +106,16 @@ class BooksPage extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.scanner),
+          onPressed: (() {
+            var parentState =
+                context.findAncestorStateOfType<BarcoderAppState>();
+
+            parentState.setState(() {
+              parentState.isScanning = true;
+            });
+          })),
     );
   }
 }
