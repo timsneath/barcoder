@@ -1,9 +1,10 @@
-import 'package:barcoder/barcoder.dart';
 import 'package:barcoder/bookdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart';
-// import 'barcode_page.dart';
+
+import 'barcoder.dart';
 import 'books.dart';
+import 'bookdetails.dart';
 
 void main() {
   runApp(BarcoderApp());
