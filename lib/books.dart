@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/books/v1.dart';
 
-import 'bookdetails.dart';
-
 const bookshelf = <String>[
   '9780525536291',
   '9781524763169',
@@ -17,7 +15,7 @@ const bookshelf = <String>[
   '9780062868930',
 ];
 
-class GoogleBook {
+class GoogleBooks {
   Future<VolumeVolumeInfo> getBook({String isbn}) async {
     var client = http.Client();
     try {
@@ -32,8 +30,21 @@ class GoogleBook {
 
 class BookTile extends StatelessWidget {
   final VolumeVolumeInfo book;
+  final ValueChanged<VolumeVolumeInfo> onTapped;
 
-  BookTile(this.book);
+  BookTile({@required this.book, @required this.onTapped});
+
+  Widget bookThumbnail() {
+    var url = book.imageLinks.thumbnail;
+    if (url != null) {
+      if (url.startsWith('http://')) {
+        url = url.replaceFirst('http://', 'https://');
+      }
+      return Image.network(url);
+    } else {
+      return const Icon(Icons.book);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,20 +54,9 @@ class BookTile extends StatelessWidget {
       return Card(
         child: InkWell(
           splashColor: Colors.blue.withAlpha(30),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return BookDetailsPage();
-                },
-              ),
-            );
-          },
+          onTap: () => onTapped(book),
           child: ListTile(
-            leading: book.imageLinks.thumbnail != null
-                ? Image.network(book.imageLinks.thumbnail)
-                : const Icon(Icons.book),
+            leading: bookThumbnail(),
             title: book.title != null ? Text(book.title) : '[Unknown]',
             subtitle: Text(book.authors.join(', ')),
           ),
@@ -66,12 +66,12 @@ class BookTile extends StatelessWidget {
   }
 }
 
-class BooksPage extends StatefulWidget {
-  @override
-  _BooksPageState createState() => _BooksPageState();
-}
+class BooksPage extends StatelessWidget {
+  final List<String> books;
+  final ValueChanged<VolumeVolumeInfo> onTapped;
 
-class _BooksPageState extends State<BooksPage> {
+  BooksPage({@required this.books, @required this.onTapped});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,12 +83,17 @@ class _BooksPageState extends State<BooksPage> {
         itemCount: bookshelf.length,
         itemBuilder: (BuildContext context, int index) {
           return FutureBuilder(
-            future: GoogleBook().getBook(isbn: bookshelf[index]),
+            future: GoogleBooks().getBook(isbn: bookshelf[index]),
             builder: (context, AsyncSnapshot<VolumeVolumeInfo> snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                return BookTile(snapshot.data);
+                return BookTile(
+                  book: snapshot.data,
+                  onTapped: onTapped,
+                );
               } else {
-                return Center(child: CircularProgressIndicator());
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
             },
           );

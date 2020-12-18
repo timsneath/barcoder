@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:googleapis/books/v1.dart';
 
 class BookDetailsPage extends StatelessWidget {
+  final VolumeVolumeInfo book;
+
+  BookDetailsPage({@required this.book});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -8,10 +13,7 @@ class BookDetailsPage extends StatelessWidget {
         title: Text('Book Details'),
       ),
       body: Center(
-        child: FlatButton(
-          child: Text('Pop!'),
-          onPressed: () => Navigator.pop(context),
-        ),
+        child: Text(book.title),
       ),
     );
   }
