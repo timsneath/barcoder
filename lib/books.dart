@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:googleapis/books/v1.dart';
+import 'package:googleapis/books/v1.dart' as booksapi;
 
 import 'main.dart';
 
-const bookshelf = <String>[
-  '9780525536291',
-  '9781524763169',
-  '9781250209764',
-  '9780593230251',
-  '9781984801258',
-  '9780385543767',
-  '9780735216723',
-  '9780385348713',
-  '9780385545969',
-  '9780062868930',
-];
-
 class GoogleBooks {
-  Future<VolumeVolumeInfo> getBook({String isbn}) async {
+  Future<booksapi.VolumeVolumeInfo> getBook({String isbn}) async {
     var client = http.Client();
     try {
-      var api = BooksApi(client);
+      var api = booksapi.BooksApi(client);
       final volumes = await api.volumes.list(q: 'isbn:$isbn');
       return volumes.items.first.volumeInfo;
     } finally {
@@ -31,8 +18,8 @@ class GoogleBooks {
 }
 
 class BookTile extends StatelessWidget {
-  final VolumeVolumeInfo book;
-  final ValueChanged<VolumeVolumeInfo> onTapped;
+  final booksapi.VolumeVolumeInfo book;
+  final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
 
   BookTile({@required this.book, @required this.onTapped});
 
@@ -69,10 +56,9 @@ class BookTile extends StatelessWidget {
 }
 
 class BooksPage extends StatefulWidget {
-  final List<String> books;
-  final ValueChanged<VolumeVolumeInfo> onTapped;
+  final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
 
-  BooksPage({@required this.books, @required this.onTapped});
+  BooksPage({@required this.onTapped});
 
   @override
   _BooksPageState createState() => _BooksPageState();
@@ -87,11 +73,13 @@ class _BooksPageState extends State<BooksPage> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(8),
-        itemCount: bookshelf.length,
+        itemCount: Bookshelf.of(context).bookshelf.length,
         itemBuilder: (BuildContext context, int index) {
           return FutureBuilder(
-            future: GoogleBooks().getBook(isbn: bookshelf[index]),
-            builder: (context, AsyncSnapshot<VolumeVolumeInfo> snapshot) {
+            future: GoogleBooks().getBook(
+                isbn: Bookshelf.of(context).bookshelf.elementAt(index)),
+            builder:
+                (context, AsyncSnapshot<booksapi.VolumeVolumeInfo> snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 return BookTile(
                   book: snapshot.data,
@@ -107,15 +95,18 @@ class _BooksPageState extends State<BooksPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.scanner),
-          onPressed: (() {
-            var parentState =
-                context.findAncestorStateOfType<BarcoderAppState>();
+        child: Icon(Icons.scanner),
+        onPressed: (() {
+          final parentState =
+              context.findAncestorStateOfType<BarcoderAppState>();
 
-            parentState.setState(() {
+          parentState.setState(
+            () {
               parentState.isScanning = true;
-            });
-          })),
+            },
+          );
+        }),
+      ),
     );
   }
 }
