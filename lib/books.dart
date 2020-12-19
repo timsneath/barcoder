@@ -70,6 +70,22 @@ class _BooksPageState extends State<BooksPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Books'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Manually add a book ISBN',
+            onPressed: () {
+              final parentState =
+                  context.findAncestorStateOfType<BarcoderAppState>();
+
+              parentState.setState(
+                () {
+                  parentState.isAddingBarcode = true;
+                },
+              );
+            },
+          )
+        ],
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(8),

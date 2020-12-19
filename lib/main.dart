@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'add_isbn.dart';
 import 'barcoder.dart';
 import 'books.dart';
 import 'bookdetails.dart';
@@ -37,6 +38,7 @@ class BarcoderAppState extends State<BarcoderApp> {
 
   VolumeVolumeInfo _selectedBook;
   bool isScanning = false;
+  bool isAddingBarcode = false;
 
   void _handleBookTapped(VolumeVolumeInfo book) {
     setState(() {
@@ -105,6 +107,19 @@ class BarcoderAppState extends State<BarcoderApp> {
                       });
                     },
                   ),
+                ),
+              if (isAddingBarcode != false)
+                MaterialPage(
+                  key: ValueKey('AddingBarcodePage'),
+                  child: AddISBNPage(
+                    onBarcodeScanned: (barcode) {
+                      setState(() async {
+                        Bookshelf.of(innerContext).bookshelf.add(barcode);
+                        await prefs.setStringList('bookshelf',
+                            Bookshelf.of(innerContext).bookshelf.toList());
+                      });
+                    },
+                  ),
                 )
             ],
             onPopPage: (route, result) {
@@ -115,6 +130,9 @@ class BarcoderAppState extends State<BarcoderApp> {
               setState(() {
                 if (isScanning == true) {
                   isScanning = false;
+                }
+                if (isAddingBarcode == true) {
+                  isAddingBarcode = false;
                 }
                 if (_selectedBook != null) {
                   _selectedBook = null;
