@@ -10,10 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.1
+  cupertino_icons: ^1.0.2
   flutter_barcode_scanner: ^1.0.1
   http: ^0.12.2
   googleapis: ^0.56.1
+  shared_preferences: '>=0.5.12+4 <2.0.0'
   
 dev_dependencies:
   pedantic: ^1.9.2

@@ -95,7 +95,7 @@ class _BooksPageState extends State<BooksPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.scanner),
+        child: Icon(Icons.qr_code_scanner),
         onPressed: (() {
           final parentState =
               context.findAncestorStateOfType<BarcoderAppState>();

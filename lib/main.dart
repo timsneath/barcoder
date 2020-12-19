@@ -1,6 +1,7 @@
 import 'package:barcoder/bookdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'barcoder.dart';
 import 'books.dart';
@@ -32,6 +33,7 @@ class BarcoderApp extends StatefulWidget {
 
 class BarcoderAppState extends State<BarcoderApp> {
   Set<String> bookshelf;
+  SharedPreferences prefs;
 
   VolumeVolumeInfo _selectedBook;
   bool isScanning = false;
@@ -44,19 +46,31 @@ class BarcoderAppState extends State<BarcoderApp> {
 
   @override
   void initState() {
-    bookshelf = {
-      '9780525536291',
-      '9781524763169',
-      '9781250209764',
-      '9780593230251',
-      '9781984801258',
-      '9780385543767',
-      '9780735216723',
-      '9780385348713',
-      '9780385545969',
-      '9780062868930',
-    };
     super.initState();
+
+    SharedPreferences.getInstance().then((prefs) => {
+          setState(() {
+            if (!prefs.containsKey('bookshelf')) {
+              print('No preferences found.');
+              bookshelf = {
+                '9780525536291',
+                '9781524763169',
+                '9781250209764',
+                '9780593230251',
+                '9781984801258',
+                '9780385543767',
+                '9780735216723',
+                '9780385348713',
+                '9780385545969',
+                '9780062868930',
+              };
+              prefs.setStringList('bookshelf', bookshelf.toList());
+            } else {
+              bookshelf = prefs.getStringList('bookshelf').toSet();
+              print('Preferences loaded.');
+            }
+          })
+        });
   }
 
   @override
@@ -64,7 +78,7 @@ class BarcoderAppState extends State<BarcoderApp> {
     return MaterialApp(
       title: 'Barcoder',
       home: Bookshelf(
-        bookshelf: bookshelf,
+        bookshelf: bookshelf ?? {},
         child: Builder(
           builder: (BuildContext innerContext) => Navigator(
             pages: [
@@ -83,11 +97,11 @@ class BarcoderAppState extends State<BarcoderApp> {
                 MaterialPage(
                   key: ValueKey('ScanningPage'),
                   child: BarcoderPage(
-                    onBarcodeScanned: (value) {
-                      setState(() {
-                        print('Added $value');
-                        Bookshelf.of(innerContext).bookshelf.add(value);
-                        print(Bookshelf.of(innerContext).bookshelf.join(', '));
+                    onBarcodeScanned: (barcode) {
+                      setState(() async {
+                        Bookshelf.of(innerContext).bookshelf.add(barcode);
+                        await prefs.setStringList('bookshelf',
+                            Bookshelf.of(innerContext).bookshelf.toList());
                       });
                     },
                   ),
