@@ -96,6 +96,14 @@ class _BooksPageState extends State<BooksPage> {
     });
 
     // TODO: Add undo action
+
+    // This only works on the latest bits (e.g. `beta` channel). If you're using
+    // Flutter 1.22 or lower (e.g. `stable` channel), you'll need to replace
+    // `ScaffoldMessenger` with `Scaffold` below for this code to successfully
+    // compile.
+    //
+    // For more information on this breaking change, see:
+    // https://flutter.dev/docs/release/breaking-changes/scaffold-messenger
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('${book.title} deleted.')));
 

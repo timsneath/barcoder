@@ -1,5 +1,5 @@
 name: barcoder
-description: A new Flutter project.
+description: A fun hobby project for cataloging book collections. 
 
 publish_to: 'none'
 version: 1.0.0+1
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.2           # Use ^1.0.0 on stable channel
   flutter_barcode_scanner: ^1.0.1
   http: ^0.12.2
   googleapis: ^0.56.1
