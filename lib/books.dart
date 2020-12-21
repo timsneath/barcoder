@@ -47,8 +47,14 @@ class BookTile extends StatelessWidget {
       // TODO: What should happen if the API returns null?
       return ListTile();
     } else {
+      // TODO: Use slidable package when refactoring is complete.
+      //   https://github.com/letsar/flutter_slidable/issues/186
       return Dismissible(
-        background: Container(color: Colors.red),
+        background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.all(16),
+            child: const Icon(Icons.delete, color: Colors.white)),
         key: Key(book.hashCode.toString()),
         direction: DismissDirection.endToStart,
         onDismissed: (direction) => onSwipeLeft(book),
