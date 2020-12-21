@@ -50,35 +50,34 @@ class BarcoderAppState extends State<BarcoderApp> {
   void initState() {
     super.initState();
 
-    // TODO: Fix double declaration of prefs
-    SharedPreferences.getInstance().then((prefs) => {
-          setState(() {
-            if (!prefs.containsKey('bookshelf')) {
-              print('No preferences found.');
-              bookshelf = {
-                '9780525536291',
-                '9781524763169',
-                '9781250209764',
-                '9780593230251',
-                '9781984801258',
-                '9780385543767',
-                '9780735216723',
-                '9780385348713',
-                '9780385545969',
-                '9780062868930',
-              };
-              prefs.setStringList('bookshelf', bookshelf.toList());
-            } else {
-              bookshelf = prefs.getStringList('bookshelf').toSet();
-              print('Preferences loaded.');
-            }
-          })
-        });
+    SharedPreferences.getInstance().then((instance) {
+      prefs = instance;
+      setState(() {
+        if (!prefs.containsKey('bookshelf')) {
+          print('No preferences found.');
+          bookshelf = {
+            '9780525536291',
+            '9781524763169',
+            '9781250209764',
+            '9780593230251',
+            '9781984801258',
+            '9780385543767',
+            '9780735216723',
+            '9780385348713',
+            '9780385545969',
+            '9780062868930',
+          };
+          prefs.setStringList('bookshelf', bookshelf.toList());
+        } else {
+          bookshelf = prefs.getStringList('bookshelf').toSet();
+          print('Preferences loaded.');
+        }
+      });
+    });
   }
 
   void updateSettings() {
-    SharedPreferences.getInstance().then(
-        (prefs) => {prefs.setStringList('bookshelf', bookshelf.toList())});
+    prefs.setStringList('bookshelf', bookshelf.toList());
   }
 
   @override
