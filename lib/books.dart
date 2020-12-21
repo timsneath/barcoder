@@ -95,6 +95,10 @@ class _BooksPageState extends State<BooksPage> {
       Bookshelf.of(context).bookshelf.remove(isbn);
     });
 
+    // TODO: Add undo action
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('${book.title} deleted.')));
+
     final parentState = context.findAncestorStateOfType<BarcoderAppState>();
     parentState.updateSettings();
   }
