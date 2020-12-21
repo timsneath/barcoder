@@ -4,12 +4,14 @@ import 'package:googleapis/books/v1.dart' as booksapi;
 
 import 'main.dart';
 
+// TODO: Make this part of the app state
 class GoogleBooks {
   Future<booksapi.VolumeVolumeInfo> getBook({String isbn}) async {
     var client = http.Client();
     try {
-      var api = booksapi.BooksApi(client);
+      final api = booksapi.BooksApi(client);
       final volumes = await api.volumes.list(q: 'isbn:$isbn');
+
       return volumes.items.first.volumeInfo;
     } finally {
       client.close();
@@ -20,8 +22,12 @@ class GoogleBooks {
 class BookTile extends StatelessWidget {
   final booksapi.VolumeVolumeInfo book;
   final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
+  final ValueChanged<booksapi.VolumeVolumeInfo> onSwipeLeft;
 
-  BookTile({@required this.book, @required this.onTapped});
+  BookTile(
+      {@required this.book,
+      @required this.onTapped,
+      @required this.onSwipeLeft});
 
   Widget bookThumbnail() {
     var url = book.imageLinks.thumbnail;
@@ -38,16 +44,23 @@ class BookTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (book == null) {
+      // TODO: What should happen if the API returns null?
       return ListTile();
     } else {
-      return Card(
-        child: InkWell(
-          splashColor: Colors.blue.withAlpha(30),
-          onTap: () => onTapped(book),
-          child: ListTile(
-            leading: bookThumbnail(),
-            title: book.title != null ? Text(book.title) : '[Unknown]',
-            subtitle: Text(book.authors.join(', ')),
+      return Dismissible(
+        background: Container(color: Colors.red),
+        key: Key(book.hashCode.toString()),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) => onSwipeLeft(book),
+        child: Card(
+          child: InkWell(
+            splashColor: Colors.blue.withAlpha(30),
+            onTap: () => onTapped(book),
+            child: ListTile(
+              leading: bookThumbnail(),
+              title: book.title != null ? Text(book.title) : '[Unknown]',
+              subtitle: Text(book.authors.join(', ')),
+            ),
           ),
         ),
       );
@@ -57,8 +70,9 @@ class BookTile extends StatelessWidget {
 
 class BooksPage extends StatefulWidget {
   final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
+  final ValueChanged<booksapi.VolumeVolumeInfo> onSwipeLeft;
 
-  BooksPage({@required this.onTapped});
+  BooksPage({@required this.onTapped, @required this.onSwipeLeft});
 
   @override
   _BooksPageState createState() => _BooksPageState();
@@ -100,6 +114,7 @@ class _BooksPageState extends State<BooksPage> {
                 return BookTile(
                   book: snapshot.data,
                   onTapped: widget.onTapped,
+                  onSwipeLeft: widget.onSwipeLeft,
                 );
               } else {
                 return Center(

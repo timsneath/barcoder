@@ -32,6 +32,7 @@ class BarcoderApp extends StatefulWidget {
   BarcoderAppState createState() => BarcoderAppState();
 }
 
+// TODO: Cache the retrieved information from the Google Books API
 class BarcoderAppState extends State<BarcoderApp> {
   Set<String> bookshelf;
   SharedPreferences prefs;
@@ -40,10 +41,22 @@ class BarcoderAppState extends State<BarcoderApp> {
   bool isScanning = false;
   bool isAddingBarcode = false;
 
+  // TODO: Should this be part of the Books page?
   void _handleBookTapped(VolumeVolumeInfo book) {
     setState(() {
       _selectedBook = book;
     });
+  }
+
+  void _handleBookDeleted(VolumeVolumeInfo book) {
+    final isbn = book.industryIdentifiers
+        .where((id) => id.type == 'ISBN_13')
+        .first
+        .identifier;
+    setState(() {
+      bookshelf.remove(isbn);
+    });
+    updateSettings();
   }
 
   @override
@@ -93,6 +106,7 @@ class BarcoderAppState extends State<BarcoderApp> {
                 key: ValueKey('BooksPage'),
                 child: BooksPage(
                   onTapped: _handleBookTapped,
+                  onSwipeLeft: _handleBookDeleted,
                 ),
               ),
               if (_selectedBook != null)
