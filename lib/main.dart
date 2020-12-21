@@ -37,27 +37,9 @@ class BarcoderAppState extends State<BarcoderApp> {
   Set<String> bookshelf;
   SharedPreferences prefs;
 
-  VolumeVolumeInfo _selectedBook;
+  VolumeVolumeInfo selectedBook;
   bool isScanning = false;
   bool isAddingBarcode = false;
-
-  // TODO: Should this be part of the Books page?
-  void _handleBookTapped(VolumeVolumeInfo book) {
-    setState(() {
-      _selectedBook = book;
-    });
-  }
-
-  void _handleBookDeleted(VolumeVolumeInfo book) {
-    final isbn = book.industryIdentifiers
-        .where((id) => id.type == 'ISBN_13')
-        .first
-        .identifier;
-    setState(() {
-      bookshelf.remove(isbn);
-    });
-    updateSettings();
-  }
 
   @override
   void initState() {
@@ -104,15 +86,12 @@ class BarcoderAppState extends State<BarcoderApp> {
             pages: [
               MaterialPage(
                 key: ValueKey('BooksPage'),
-                child: BooksPage(
-                  onTapped: _handleBookTapped,
-                  onSwipeLeft: _handleBookDeleted,
-                ),
+                child: BooksPage(),
               ),
-              if (_selectedBook != null)
+              if (selectedBook != null)
                 MaterialPage(
-                  key: ValueKey(_selectedBook),
-                  child: BookDetailsPage(book: _selectedBook),
+                  key: ValueKey(selectedBook),
+                  child: BookDetailsPage(book: selectedBook),
                 ),
               if (isScanning != false)
                 MaterialPage(
@@ -151,8 +130,8 @@ class BarcoderAppState extends State<BarcoderApp> {
                 if (isAddingBarcode == true) {
                   isAddingBarcode = false;
                 }
-                if (_selectedBook != null) {
-                  _selectedBook = null;
+                if (selectedBook != null) {
+                  selectedBook = null;
                 }
               });
               return true;

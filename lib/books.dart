@@ -69,16 +69,36 @@ class BookTile extends StatelessWidget {
 }
 
 class BooksPage extends StatefulWidget {
-  final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
-  final ValueChanged<booksapi.VolumeVolumeInfo> onSwipeLeft;
-
-  BooksPage({@required this.onTapped, @required this.onSwipeLeft});
+  BooksPage();
 
   @override
   _BooksPageState createState() => _BooksPageState();
 }
 
 class _BooksPageState extends State<BooksPage> {
+  void _handleBookTapped(booksapi.VolumeVolumeInfo book) {
+    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+
+    parentState.setState(
+      () {
+        parentState.selectedBook = book;
+      },
+    );
+  }
+
+  void _handleBookDeleted(booksapi.VolumeVolumeInfo book) {
+    final isbn = book.industryIdentifiers
+        .where((id) => id.type == 'ISBN_13')
+        .first
+        .identifier;
+    setState(() {
+      Bookshelf.of(context).bookshelf.remove(isbn);
+    });
+
+    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+    parentState.updateSettings();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,8 +133,8 @@ class _BooksPageState extends State<BooksPage> {
               if (snapshot.connectionState == ConnectionState.done) {
                 return BookTile(
                   book: snapshot.data,
-                  onTapped: widget.onTapped,
-                  onSwipeLeft: widget.onSwipeLeft,
+                  onTapped: _handleBookTapped,
+                  onSwipeLeft: _handleBookDeleted,
                 );
               } else {
                 return Center(
