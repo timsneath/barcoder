@@ -50,6 +50,7 @@ class BarcoderAppState extends State<BarcoderApp> {
   void initState() {
     super.initState();
 
+    // TODO: Fix double declaration of prefs
     SharedPreferences.getInstance().then((prefs) => {
           setState(() {
             if (!prefs.containsKey('bookshelf')) {
@@ -73,6 +74,11 @@ class BarcoderAppState extends State<BarcoderApp> {
             }
           })
         });
+  }
+
+  void updateSettings() {
+    SharedPreferences.getInstance().then(
+        (prefs) => {prefs.setStringList('bookshelf', bookshelf.toList())});
   }
 
   @override
@@ -100,11 +106,10 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('ScanningPage'),
                   child: BarcoderPage(
                     onBarcodeScanned: (barcode) {
-                      setState(() async {
+                      setState(() {
                         Bookshelf.of(innerContext).bookshelf.add(barcode);
-                        await prefs.setStringList('bookshelf',
-                            Bookshelf.of(innerContext).bookshelf.toList());
                       });
+                      updateSettings();
                     },
                   ),
                 ),
@@ -113,11 +118,10 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('AddingBarcodePage'),
                   child: AddISBNPage(
                     onBarcodeScanned: (barcode) {
-                      setState(() async {
+                      setState(() {
                         Bookshelf.of(innerContext).bookshelf.add(barcode);
-                        await prefs.setStringList('bookshelf',
-                            Bookshelf.of(innerContext).bookshelf.toList());
                       });
+                      updateSettings();
                     },
                   ),
                 )

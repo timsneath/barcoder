@@ -20,6 +20,15 @@ class _AddISBNPageState extends State<AddISBNPage> {
     super.dispose();
   }
 
+  void closeDialog() {
+    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+    parentState.setState(
+      () {
+        parentState.isAddingBarcode = false;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,21 +41,18 @@ class _AddISBNPageState extends State<AddISBNPage> {
           controller: textController,
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FlatButton(
-              onPressed: (() => {widget.onBarcodeScanned(textController.text)}),
+            RaisedButton(
+              onPressed: (() {
+                widget.onBarcodeScanned(textController.text);
+                closeDialog();
+              }),
               child: Text('Add'),
             ),
-            FlatButton(
+            RaisedButton(
               onPressed: (() {
-                final parentState =
-                    context.findAncestorStateOfType<BarcoderAppState>();
-
-                parentState.setState(
-                  () {
-                    parentState.isAddingBarcode = false;
-                  },
-                );
+                closeDialog();
               }),
               child: Text('Cancel'),
             ),
