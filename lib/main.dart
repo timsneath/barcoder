@@ -1,6 +1,7 @@
 import 'package:barcoder/bookdetails.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/books/v1.dart';
+import 'package:googleapis/books/v1.dart' as google_books;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_isbn.dart';
@@ -8,23 +9,10 @@ import 'barcoder.dart';
 import 'books.dart';
 import 'bookdetails.dart';
 
+import 'model/book_cache.dart';
+
 void main() {
   runApp(BarcoderApp());
-}
-
-class Bookshelf extends InheritedWidget {
-  final Set<String> bookshelf;
-
-  const Bookshelf({this.bookshelf, @required Widget child})
-      : super(child: child);
-
-  static Bookshelf of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<Bookshelf>();
-  }
-
-  @override
-  bool updateShouldNotify(Bookshelf oldBookshelf) =>
-      oldBookshelf.bookshelf != bookshelf;
 }
 
 class BarcoderApp extends StatefulWidget {
@@ -32,12 +20,10 @@ class BarcoderApp extends StatefulWidget {
   BarcoderAppState createState() => BarcoderAppState();
 }
 
-// TODO: Cache the retrieved information from the Google Books API
 class BarcoderAppState extends State<BarcoderApp> {
-  Set<String> bookshelf;
   SharedPreferences prefs;
 
-  VolumeVolumeInfo selectedBook;
+  google_books.VolumeVolumeInfo selectedBook;
   bool isScanning = false;
   bool isAddingBarcode = false;
 
@@ -50,7 +36,7 @@ class BarcoderAppState extends State<BarcoderApp> {
       setState(() {
         if (!prefs.containsKey('bookshelf')) {
           print('No preferences found.');
-          bookshelf = {
+          final bookshelf = {
             '9780525536291',
             '9781524763169',
             '9781250209764',
@@ -64,23 +50,23 @@ class BarcoderAppState extends State<BarcoderApp> {
           };
           prefs.setStringList('bookshelf', bookshelf.toList());
         } else {
-          bookshelf = prefs.getStringList('bookshelf').toSet();
           print('Preferences loaded.');
+          final shelf = prefs.getStringList('bookshelf');
+          Provider.of<BookStore>(context).addAll(shelf);
         }
       });
     });
   }
 
-  void updateSettings() {
-    prefs.setStringList('bookshelf', bookshelf.toList());
-  }
+  void updateSettings() => prefs.setStringList(
+      'bookshelf', Provider.of<BookStore>(context, listen: false).bookISBNs);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Barcoder',
-      home: Bookshelf(
-        bookshelf: bookshelf ?? {},
+      home: ChangeNotifierProvider(
+        create: (context) => BookStore()..addListener(updateSettings),
         child: Builder(
           builder: (BuildContext innerContext) => Navigator(
             pages: [
@@ -98,10 +84,8 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('ScanningPage'),
                   child: BarcoderPage(
                     onBarcodeScanned: (barcode) {
-                      setState(() {
-                        Bookshelf.of(innerContext).bookshelf.add(barcode);
-                      });
-                      updateSettings();
+                      Provider.of<BookStore>(context, listen: false)
+                          .add(barcode);
                     },
                   ),
                 ),
@@ -110,10 +94,8 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('AddingBarcodePage'),
                   child: AddISBNPage(
                     onBarcodeScanned: (barcode) {
-                      setState(() {
-                        Bookshelf.of(innerContext).bookshelf.add(barcode);
-                      });
-                      updateSettings();
+                      Provider.of<BookStore>(context, listen: false)
+                          .add(barcode);
                     },
                   ),
                 )

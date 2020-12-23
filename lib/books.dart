@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:googleapis/books/v1.dart' as booksapi;
+import 'package:googleapis/books/v1.dart' as google_books;
+import 'package:provider/provider.dart';
 
+import 'model/book_cache.dart';
 import 'main.dart';
 
-// TODO: Make this part of the app state
-class GoogleBooks {
-  Future<booksapi.VolumeVolumeInfo> getBook({String isbn}) async {
-    var client = http.Client();
-    try {
-      final api = booksapi.BooksApi(client);
-      final volumes = await api.volumes.list(q: 'isbn:$isbn');
-
-      return volumes.items.first.volumeInfo;
-    } finally {
-      client.close();
-    }
-  }
-}
-
 class BookTile extends StatelessWidget {
-  final booksapi.VolumeVolumeInfo book;
-  final ValueChanged<booksapi.VolumeVolumeInfo> onTapped;
-  final ValueChanged<booksapi.VolumeVolumeInfo> onSwipeLeft;
+  final google_books.VolumeVolumeInfo book;
+  final ValueChanged<google_books.VolumeVolumeInfo> onTapped;
+  final ValueChanged<google_books.VolumeVolumeInfo> onSwipeLeft;
 
   BookTile(
       {@required this.book,
@@ -82,7 +68,7 @@ class BooksPage extends StatefulWidget {
 }
 
 class _BooksPageState extends State<BooksPage> {
-  void _handleBookTapped(booksapi.VolumeVolumeInfo book) {
+  void _handleBookTapped(google_books.VolumeVolumeInfo book) {
     final parentState = context.findAncestorStateOfType<BarcoderAppState>();
 
     parentState.setState(
@@ -92,14 +78,12 @@ class _BooksPageState extends State<BooksPage> {
     );
   }
 
-  void _handleBookDeleted(booksapi.VolumeVolumeInfo book) {
+  void _handleBookDeleted(google_books.VolumeVolumeInfo book) {
     final isbn = book.industryIdentifiers
         .where((id) => id.type == 'ISBN_13')
         .first
         .identifier;
-    setState(() {
-      Bookshelf.of(context).bookshelf.remove(isbn);
-    });
+    Provider.of<BookStore>(context).removeBook(isbn);
 
     // TODO: Add undo action
 
@@ -139,28 +123,18 @@ class _BooksPageState extends State<BooksPage> {
           )
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: Bookshelf.of(context).bookshelf.length,
-        itemBuilder: (BuildContext context, int index) {
-          return FutureBuilder(
-            future: GoogleBooks().getBook(
-                isbn: Bookshelf.of(context).bookshelf.elementAt(index)),
-            builder:
-                (context, AsyncSnapshot<booksapi.VolumeVolumeInfo> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+      body: Consumer<BookStore>(
+        builder: (context, store, child) {
+          return ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: store.length(),
+              itemBuilder: (BuildContext context, int index) {
                 return BookTile(
-                  book: snapshot.data,
+                  book: store[index],
                   onTapped: _handleBookTapped,
                   onSwipeLeft: _handleBookDeleted,
                 );
-              } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
-          );
+              });
         },
       ),
       floatingActionButton: FloatingActionButton(
