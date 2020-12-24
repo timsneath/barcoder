@@ -68,17 +68,56 @@ class BooksPage extends StatefulWidget {
 }
 
 class _BooksPageState extends State<BooksPage> {
-  void _handleBookTapped(google_books.VolumeVolumeInfo book) {
-    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Books'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Manually add a book ISBN',
+            onPressed: () {
+              final parentState =
+                  context.findAncestorStateOfType<BarcoderAppState>();
 
-    parentState.setState(
-      () {
-        parentState.selectedBook = book;
-      },
+              parentState.setState(
+                () {
+                  parentState.isAddingBarcode = true;
+                },
+              );
+            },
+          )
+        ],
+      ),
+      body: BooksList(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.qr_code_scanner),
+        onPressed: (() {
+          final parentState =
+              context.findAncestorStateOfType<BarcoderAppState>();
+
+          parentState.setState(
+            () {
+              parentState.isScanning = true;
+            },
+          );
+        }),
+      ),
     );
   }
+}
 
-  void _handleBookDeleted(google_books.VolumeVolumeInfo book) {
+class BooksList extends StatelessWidget {
+  void _handleBookTapped(
+      BuildContext context, google_books.VolumeVolumeInfo book) {
+    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+
+    parentState.selectedBook = book;
+  }
+
+  void _handleBookDeleted(
+      BuildContext context, google_books.VolumeVolumeInfo book) {
     final isbn = book.industryIdentifiers
         .where((id) => id.type == 'ISBN_13')
         .first
@@ -103,53 +142,19 @@ class _BooksPageState extends State<BooksPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Books'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Manually add a book ISBN',
-            onPressed: () {
-              final parentState =
-                  context.findAncestorStateOfType<BarcoderAppState>();
-
-              parentState.setState(
-                () {
-                  parentState.isAddingBarcode = true;
-                },
+    return Consumer<BookStore>(
+      builder: (context, store, child) {
+        return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: store.length(),
+            itemBuilder: (BuildContext context, int index) {
+              return BookTile(
+                book: store[index],
+                onTapped: (book) => _handleBookTapped(context, book),
+                onSwipeLeft: (book) => _handleBookDeleted(context, book),
               );
-            },
-          )
-        ],
-      ),
-      body: Consumer<BookStore>(
-        builder: (context, store, child) {
-          return ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: store.length(),
-              itemBuilder: (BuildContext context, int index) {
-                return BookTile(
-                  book: store[index],
-                  onTapped: _handleBookTapped,
-                  onSwipeLeft: _handleBookDeleted,
-                );
-              });
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.qr_code_scanner),
-        onPressed: (() {
-          final parentState =
-              context.findAncestorStateOfType<BarcoderAppState>();
-
-          parentState.setState(
-            () {
-              parentState.isScanning = true;
-            },
-          );
-        }),
-      ),
+            });
+      },
     );
   }
 }

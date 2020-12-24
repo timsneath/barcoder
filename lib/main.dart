@@ -30,32 +30,6 @@ class BarcoderAppState extends State<BarcoderApp> {
   @override
   void initState() {
     super.initState();
-
-    SharedPreferences.getInstance().then((instance) {
-      prefs = instance;
-      setState(() {
-        if (!prefs.containsKey('bookshelf')) {
-          print('No preferences found.');
-          final bookshelf = {
-            '9780525536291',
-            '9781524763169',
-            '9781250209764',
-            '9780593230251',
-            '9781984801258',
-            '9780385543767',
-            '9780735216723',
-            '9780385348713',
-            '9780385545969',
-            '9780062868930',
-          };
-          prefs.setStringList('bookshelf', bookshelf.toList());
-        } else {
-          print('Preferences loaded.');
-          final shelf = prefs.getStringList('bookshelf');
-          Provider.of<BookStore>(context).addAll(shelf);
-        }
-      });
-    });
   }
 
   void updateSettings() => prefs.setStringList(
@@ -66,7 +40,10 @@ class BarcoderAppState extends State<BarcoderApp> {
     return MaterialApp(
       title: 'Barcoder',
       home: ChangeNotifierProvider(
-        create: (context) => BookStore()..addListener(updateSettings),
+        create: (context) => BookStore()
+
+        // ..addListener(updateSettings)
+        ,
         child: Builder(
           builder: (BuildContext innerContext) => Navigator(
             pages: [
