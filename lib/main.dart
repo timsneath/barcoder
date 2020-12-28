@@ -2,7 +2,6 @@ import 'package:barcoder/bookdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_isbn.dart';
 import 'barcoder.dart';
