@@ -8,6 +8,7 @@ import 'add_isbn.dart';
 import 'barcoder.dart';
 import 'books.dart';
 import 'bookdetails.dart';
+import 'startup.dart';
 
 import 'model/book_cache.dart';
 
@@ -24,13 +25,9 @@ class BarcoderAppState extends State<BarcoderApp> {
   SharedPreferences prefs;
 
   google_books.VolumeVolumeInfo selectedBook;
+  bool isLoaded = false;
   bool isScanning = false;
   bool isAddingBarcode = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   void updateSettings() => prefs.setStringList(
       'bookshelf', Provider.of<BookStore>(context, listen: false).bookISBNs);
@@ -47,10 +44,16 @@ class BarcoderAppState extends State<BarcoderApp> {
         child: Builder(
           builder: (BuildContext innerContext) => Navigator(
             pages: [
-              MaterialPage(
-                key: ValueKey('BooksPage'),
-                child: BooksPage(),
-              ),
+              if (isLoaded == false)
+                MaterialPage(
+                  key: ValueKey('StartupPage'),
+                  child: StartupPage(),
+                )
+              else
+                MaterialPage(
+                  key: ValueKey('BooksPage'),
+                  child: BooksPage(),
+                ),
               if (selectedBook != null)
                 MaterialPage(
                   key: ValueKey(selectedBook),

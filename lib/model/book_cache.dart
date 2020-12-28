@@ -39,20 +39,7 @@ class BookStore extends ChangeNotifier {
   // });
 
   // TODO: Init from preferences
-  BookStore() {
-    addAll([
-      '9780525536291',
-      '9781524763169',
-      '9781250209764',
-      '9780593230251',
-      '9781984801258',
-      '9780385543767',
-      '9780735216723',
-      '9780385348713',
-      '9780385545969',
-      '9780062868930',
-    ]);
-  }
+  BookStore();
 
   UnmodifiableListView<String> get bookISBNs => _books.keys;
 
@@ -68,6 +55,7 @@ class BookStore extends ChangeNotifier {
       for (final isbn in isbnList) {
         _books[isbn] =
             await bookService.getBookDetails(isbn, httpClient: httpClient);
+        print('added book $isbn. _books.length is ${_books.length}.');
       }
       notifyListeners();
     } finally {
@@ -75,7 +63,10 @@ class BookStore extends ChangeNotifier {
     }
   }
 
-  google_books.VolumeVolumeInfo operator [](isbn) => _books[isbn];
+  google_books.VolumeVolumeInfo get first => _books.entries.first.value;
+
+  google_books.VolumeVolumeInfo operator [](int index) =>
+      _books.entries.toList()[index].value;
 
   int length() {
     return _books.keys.length;
@@ -89,5 +80,20 @@ class BookStore extends ChangeNotifier {
   void removeAll() {
     _books.clear();
     notifyListeners();
+  }
+
+  Future<void> init() async {
+    await addAll([
+      '9780525536291',
+      '9781524763169',
+      '9781250209764',
+      '9780593230251',
+      '9781984801258',
+      '9780385543767',
+      '9780735216723',
+      '9780385348713',
+      '9780385545969',
+      '9780062868930',
+    ]);
   }
 }

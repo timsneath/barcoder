@@ -142,8 +142,11 @@ class BooksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('bookslist.build()');
     return Consumer<BookStore>(
       builder: (context, store, child) {
+        print('store.length is ${store.length()}');
+        // return Text(store.first.title);
         return ListView.builder(
             padding: const EdgeInsets.all(8),
             itemCount: store.length(),
