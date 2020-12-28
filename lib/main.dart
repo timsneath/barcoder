@@ -22,15 +22,10 @@ class BarcoderApp extends StatefulWidget {
 }
 
 class BarcoderAppState extends State<BarcoderApp> {
-  SharedPreferences prefs;
-
   google_books.VolumeVolumeInfo selectedBook;
   bool isLoaded = false;
   bool isScanning = false;
   bool isAddingBarcode = false;
-
-  void updateSettings() => prefs.setStringList(
-      'bookshelf', Provider.of<BookStore>(context, listen: false).bookISBNs);
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +59,7 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('ScanningPage'),
                   child: BarcoderPage(
                     onBarcodeScanned: (barcode) {
-                      Provider.of<BookStore>(context, listen: false)
+                      Provider.of<BookStore>(innerContext, listen: false)
                           .add(barcode);
                     },
                   ),
@@ -74,7 +69,7 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('AddingBarcodePage'),
                   child: AddISBNPage(
                     onBarcodeScanned: (barcode) {
-                      Provider.of<BookStore>(context, listen: false)
+                      Provider.of<BookStore>(innerContext, listen: false)
                           .add(barcode);
                     },
                   ),

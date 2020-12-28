@@ -33,10 +33,10 @@ class _AddISBNPageState extends State<AddISBNPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manually add barcode'),
+        title: const Text('Manually add ISBN'),
       ),
       body: Column(children: [
-        Text('Enter the barcode to add:'),
+        Text('Enter the ISBN to add:'),
         TextField(
           controller: textController,
         ),
@@ -45,6 +45,7 @@ class _AddISBNPageState extends State<AddISBNPage> {
           children: [
             RaisedButton(
               onPressed: (() {
+                print('ISBN: ${textController.text}');
                 widget.onBarcodeScanned(textController.text);
                 closeDialog();
               }),

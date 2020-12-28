@@ -1,47 +1,19 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 
 import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'book_service.dart';
 
 /// A 'shopping cart' of books.
 class BookStore extends ChangeNotifier {
+  SharedPreferences prefs;
+
   final Map<String, google_books.VolumeVolumeInfo> _books = {};
   final BookService bookService = BookService();
 
-  // SharedPreferences.getInstance().then((instance) {
-  //   prefs = instance;
-  //   setState(() {
-  //     if (!prefs.containsKey('bookshelf')) {
-  //       print('No preferences found.');
-  //       final bookshelf = {
-  //         '9780525536291',
-  //         '9781524763169',
-  //         '9781250209764',
-  //         '9780593230251',
-  //         '9781984801258',
-  //         '9780385543767',
-  //         '9780735216723',
-  //         '9780385348713',
-  //         '9780385545969',
-  //         '9780062868930',
-  //       };
-  //       prefs.setStringList('bookshelf', bookshelf.toList());
-  //     } else {
-  //       print('Preferences loaded.');
-  //       final shelf = prefs.getStringList('bookshelf');
-  //       Provider.of<BookStore>(context).addAll(shelf);
-  //     }
-  //   });
-  // });
-
-  // TODO: Init from preferences
-  BookStore();
-
-  UnmodifiableListView<String> get bookISBNs => _books.keys;
+  List<String> get bookISBNs => _books.keys.toList();
 
   void add(String isbn) async {
     _books[isbn] = await bookService.getBookDetails(isbn);
@@ -72,8 +44,11 @@ class BookStore extends ChangeNotifier {
     return _books.keys.length;
   }
 
-  void removeBook(String isbn) {
-    _books.remove(isbn);
+  void removeBook(google_books.VolumeVolumeInfo bookToRemove) {
+    assert(_books.containsValue(bookToRemove));
+    _books.removeWhere((_, book) => book == bookToRemove);
+    prefs.setStringList('bookshelf', bookISBNs);
+
     notifyListeners();
   }
 
@@ -83,17 +58,26 @@ class BookStore extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    await addAll([
-      '9780525536291',
-      '9781524763169',
-      '9781250209764',
-      '9780593230251',
-      '9781984801258',
-      '9780385543767',
-      '9780735216723',
-      '9780385348713',
-      '9780385545969',
-      '9780062868930',
-    ]);
+    prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('bookshelf')) {
+      print('No preferences found.');
+      await addAll([
+        '9780525536291',
+        '9781524763169',
+        '9781250209764',
+        '9780593230251',
+        '9781984801258',
+        '9780385543767',
+        '9780735216723',
+        '9780385348713',
+        '9780385545969',
+        '9780062868930',
+      ]);
+      await prefs.setStringList('bookshelf', bookISBNs);
+    } else {
+      print('Preferences found.');
+      final shelf = prefs.getStringList('bookshelf');
+      await addAll(shelf);
+    }
   }
 }

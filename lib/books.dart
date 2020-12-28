@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/book_cache.dart';
 import 'main.dart';
@@ -68,6 +69,8 @@ class BooksPage extends StatefulWidget {
 }
 
 class _BooksPageState extends State<BooksPage> {
+  SharedPreferences prefs;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +93,20 @@ class _BooksPageState extends State<BooksPage> {
           )
         ],
       ),
-      body: BooksList(),
+      body: BooksList(
+        onTapped: (book) {
+          print('Clicked ${book.title}');
+
+          final parentState =
+              context.findAncestorStateOfType<BarcoderAppState>();
+
+          parentState.setState(
+            () {
+              parentState.selectedBook = book;
+            },
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.qr_code_scanner),
         onPressed: (() {
@@ -109,20 +125,12 @@ class _BooksPageState extends State<BooksPage> {
 }
 
 class BooksList extends StatelessWidget {
-  void _handleBookTapped(
-      BuildContext context, google_books.VolumeVolumeInfo book) {
-    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
+  final ValueChanged<google_books.VolumeVolumeInfo> onTapped;
 
-    parentState.selectedBook = book;
-  }
+  BooksList({@required this.onTapped});
 
-  void _handleBookDeleted(
-      BuildContext context, google_books.VolumeVolumeInfo book) {
-    final isbn = book.industryIdentifiers
-        .where((id) => id.type == 'ISBN_13')
-        .first
-        .identifier;
-    Provider.of<BookStore>(context).removeBook(isbn);
+  void deleteBook(BuildContext context, google_books.VolumeVolumeInfo book) {
+    Provider.of<BookStore>(context, listen: false).removeBook(book);
 
     // TODO: Add undo action
 
@@ -135,9 +143,6 @@ class BooksList extends StatelessWidget {
     // https://flutter.dev/docs/release/breaking-changes/scaffold-messenger
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('${book.title} deleted.')));
-
-    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
-    parentState.updateSettings();
   }
 
   @override
@@ -153,8 +158,8 @@ class BooksList extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) {
               return BookTile(
                 book: store[index],
-                onTapped: (book) => _handleBookTapped(context, book),
-                onSwipeLeft: (book) => _handleBookDeleted(context, book),
+                onTapped: (book) => onTapped(book),
+                onSwipeLeft: (book) => deleteBook(context, book),
               );
             });
       },
