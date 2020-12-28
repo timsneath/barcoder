@@ -9,7 +9,7 @@ import 'books.dart';
 import 'bookdetails.dart';
 import 'startup.dart';
 
-import 'model/book_cache.dart';
+import 'model/bookshelf_model.dart';
 
 void main() {
   runApp(BarcoderApp());
@@ -31,7 +31,7 @@ class BarcoderAppState extends State<BarcoderApp> {
     return MaterialApp(
       title: 'Barcoder',
       home: ChangeNotifierProvider(
-        create: (context) => BookStore()
+        create: (context) => BookshelfModel()
 
         // ..addListener(updateSettings)
         ,
@@ -58,7 +58,7 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('ScanningPage'),
                   child: BarcoderPage(
                     onBarcodeScanned: (barcode) {
-                      Provider.of<BookStore>(innerContext, listen: false)
+                      Provider.of<BookshelfModel>(innerContext, listen: false)
                           .add(barcode);
                     },
                   ),
@@ -68,7 +68,7 @@ class BarcoderAppState extends State<BarcoderApp> {
                   key: ValueKey('AddingBarcodePage'),
                   child: AddISBNPage(
                     onBarcodeScanned: (barcode) {
-                      Provider.of<BookStore>(innerContext, listen: false)
+                      Provider.of<BookshelfModel>(innerContext, listen: false)
                           .add(barcode);
                     },
                   ),

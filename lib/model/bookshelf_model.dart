@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:http/http.dart' as http;
@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'book_service.dart';
 
 /// A 'shopping cart' of books.
-class BookStore extends ChangeNotifier {
+class BookshelfModel extends ChangeNotifier {
   SharedPreferences prefs;
 
   final Map<String, google_books.VolumeVolumeInfo> _books = {};

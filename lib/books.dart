@@ -3,7 +3,7 @@ import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'model/book_cache.dart';
+import 'model/bookshelf_model.dart';
 import 'main.dart';
 
 class BookTile extends StatelessWidget {
@@ -130,7 +130,7 @@ class BooksList extends StatelessWidget {
   BooksList({@required this.onTapped});
 
   void deleteBook(BuildContext context, google_books.VolumeVolumeInfo book) {
-    Provider.of<BookStore>(context, listen: false).removeBook(book);
+    Provider.of<BookshelfModel>(context, listen: false).removeBook(book);
 
     // TODO: Add undo action
 
@@ -148,7 +148,7 @@ class BooksList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('bookslist.build()');
-    return Consumer<BookStore>(
+    return Consumer<BookshelfModel>(
       builder: (context, store, child) {
         print('store.length is ${store.length()}');
         // return Text(store.first.title);
