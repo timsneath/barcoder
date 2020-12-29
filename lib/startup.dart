@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'main.dart';
 import 'model/bookshelf_model.dart';
+import 'model/navigator_model.dart';
 
 class StartupPage extends StatefulWidget {
   StartupPage();
@@ -20,12 +20,7 @@ class _StartupPageState extends State<StartupPage> {
 
   Future<void> onStart() async {
     await Provider.of<BookshelfModel>(context, listen: false).init();
-    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
-    parentState.setState(
-      () {
-        parentState.isLoaded = true;
-      },
-    );
+    Provider.of<NavigatorModel>(context, listen: false).isLoaded = true;
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'main.dart';
+import 'model/navigator_model.dart';
 
 class AddISBNPage extends StatefulWidget {
   final ValueChanged<String> onBarcodeScanned;
@@ -21,12 +22,7 @@ class _AddISBNPageState extends State<AddISBNPage> {
   }
 
   void closeDialog() {
-    final parentState = context.findAncestorStateOfType<BarcoderAppState>();
-    parentState.setState(
-      () {
-        parentState.isAddingBarcode = false;
-      },
-    );
+    Provider.of<NavigatorModel>(context, listen: false).isAddingISBN = false;
   }
 
   @override
@@ -52,9 +48,7 @@ class _AddISBNPageState extends State<AddISBNPage> {
               child: Text('Add'),
             ),
             RaisedButton(
-              onPressed: (() {
-                closeDialog();
-              }),
+              onPressed: (() => closeDialog()),
               child: Text('Cancel'),
             ),
           ],

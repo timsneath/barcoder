@@ -30,7 +30,6 @@ class _BarcoderPageState extends State<BarcoderPage> {
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      widget.onBarcodeScanned(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
@@ -43,6 +42,8 @@ class _BarcoderPageState extends State<BarcoderPage> {
     setState(() {
       _scanBarcode = barcodeScanRes;
     });
+
+    widget.onBarcodeScanned(barcodeScanRes);
   }
 
   @override

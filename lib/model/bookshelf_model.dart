@@ -17,6 +17,8 @@ class BookshelfModel extends ChangeNotifier {
 
   void add(String isbn) async {
     _books[isbn] = await bookService.getBookDetails(isbn);
+    await prefs.setStringList('bookshelf', bookISBNs);
+
     notifyListeners();
   }
 

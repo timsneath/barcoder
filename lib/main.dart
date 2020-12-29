@@ -1,6 +1,6 @@
 import 'package:barcoder/bookdetails.dart';
+import 'package:barcoder/model/navigator_model.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:provider/provider.dart';
 
 import 'add_isbn.dart';
@@ -21,79 +21,83 @@ class BarcoderApp extends StatefulWidget {
 }
 
 class BarcoderAppState extends State<BarcoderApp> {
-  google_books.VolumeVolumeInfo selectedBook;
-  bool isLoaded = false;
-  bool isScanning = false;
-  bool isAddingBarcode = false;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Barcoder',
-      home: ChangeNotifierProvider(
-        create: (context) => BookshelfModel()
-
-        // ..addListener(updateSettings)
-        ,
-        child: Builder(
-          builder: (BuildContext innerContext) => Navigator(
-            pages: [
-              if (isLoaded == false)
-                MaterialPage(
-                  key: ValueKey('StartupPage'),
-                  child: StartupPage(),
-                )
-              else
-                MaterialPage(
-                  key: ValueKey('BooksPage'),
-                  child: BooksPage(),
-                ),
-              if (selectedBook != null)
-                MaterialPage(
-                  key: ValueKey(selectedBook),
-                  child: BookDetailsPage(book: selectedBook),
-                ),
-              if (isScanning != false)
-                MaterialPage(
-                  key: ValueKey('ScanningPage'),
-                  child: BarcoderPage(
-                    onBarcodeScanned: (barcode) {
-                      Provider.of<BookshelfModel>(innerContext, listen: false)
-                          .add(barcode);
-                    },
-                  ),
-                ),
-              if (isAddingBarcode != false)
-                MaterialPage(
-                  key: ValueKey('AddingBarcodePage'),
-                  child: AddISBNPage(
-                    onBarcodeScanned: (barcode) {
-                      Provider.of<BookshelfModel>(innerContext, listen: false)
-                          .add(barcode);
-                    },
-                  ),
-                )
-            ],
-            onPopPage: (route, result) {
-              if (!route.didPop(result)) {
-                return false;
-              }
-
-              setState(() {
-                if (isScanning == true) {
-                  isScanning = false;
-                }
-                if (isAddingBarcode == true) {
-                  isAddingBarcode = false;
-                }
-                if (selectedBook != null) {
-                  selectedBook = null;
-                }
-              });
-              return true;
-            },
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => NavigatorModel()),
+          ChangeNotifierProvider(
+            create: (_) => BookshelfModel(),
           ),
-        ),
+        ],
+        child: BarcoderNavigator(),
+      ),
+    );
+  }
+}
+
+class BarcoderNavigator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NavigatorModel>(
+      builder: (_, pageModel, __) => Navigator(
+        pages: [
+          if (pageModel.isLoaded == false)
+            MaterialPage(
+              key: ValueKey('StartupPage'),
+              child: StartupPage(),
+            )
+          else
+            MaterialPage(
+              key: ValueKey('BooksPage'),
+              child: BooksPage(),
+            ),
+          if (pageModel.selectedBook != null)
+            MaterialPage(
+              key: ValueKey(pageModel.selectedBook),
+              child: BookDetailsPage(book: pageModel.selectedBook),
+            ),
+          if (pageModel.isScanning != false)
+            MaterialPage(
+              key: ValueKey('ScanningPage'),
+              child: BarcoderPage(
+                onBarcodeScanned: (barcode) {
+                  Provider.of<BookshelfModel>(context, listen: false)
+                      .add(barcode);
+                },
+              ),
+            ),
+          if (pageModel.isAddingISBN != false)
+            MaterialPage(
+              key: ValueKey('AddingBarcodePage'),
+              child: AddISBNPage(
+                onBarcodeScanned: (barcode) {
+                  Provider.of<BookshelfModel>(context, listen: false)
+                      .add(barcode);
+                },
+              ),
+            )
+        ],
+        onPopPage: (route, result) {
+          if (!route.didPop(result)) {
+            return false;
+          }
+
+          if (pageModel.isScanning) {
+            pageModel.isScanning = false;
+          }
+
+          if (pageModel.isAddingISBN) {
+            pageModel.isAddingISBN = false;
+          }
+          if (pageModel.selectedBook != null) {
+            pageModel.selectedBook = null;
+          }
+
+          return true;
+        },
       ),
     );
   }

@@ -1,10 +1,97 @@
+import 'package:barcoder/model/navigator_model.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/books/v1.dart' as google_books;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/bookshelf_model.dart';
-import 'main.dart';
+
+class BooksPage extends StatefulWidget {
+  BooksPage();
+
+  @override
+  _BooksPageState createState() => _BooksPageState();
+}
+
+class _BooksPageState extends State<BooksPage> {
+  SharedPreferences prefs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Books'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Manually add a book ISBN',
+            onPressed: () {
+              Provider.of<NavigatorModel>(context, listen: false).isAddingISBN =
+                  true;
+            },
+          )
+        ],
+      ),
+      body: BooksList(
+        onTapped: (book) {
+          print('Clicked ${book.title}');
+
+          Provider.of<NavigatorModel>(context, listen: false).selectedBook =
+              book;
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.qr_code_scanner),
+        onPressed: (() {
+          Provider.of<NavigatorModel>(context, listen: false).isScanning = true;
+        }),
+      ),
+    );
+  }
+}
+
+class BooksList extends StatelessWidget {
+  final ValueChanged<google_books.VolumeVolumeInfo> onTapped;
+
+  BooksList({@required this.onTapped});
+
+  void deleteBook(BuildContext context, google_books.VolumeVolumeInfo book) {
+    Provider.of<BookshelfModel>(context, listen: false).removeBook(book);
+
+    // TODO: Add undo action
+
+    // This only works on the latest bits (e.g. `beta` channel). If you're using
+    // Flutter 1.22 or lower (e.g. `stable` channel), you'll need to replace
+    // `ScaffoldMessenger` with `Scaffold` below for this code to successfully
+    // compile.
+    //
+    // For more information on this breaking change, see:
+    // https://flutter.dev/docs/release/breaking-changes/scaffold-messenger
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('${book.title} deleted.')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('bookslist.build()');
+    return Consumer<BookshelfModel>(
+      builder: (_, store, __) {
+        print('store.length is ${store.length()}');
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: store.length(),
+          itemBuilder: (BuildContext context, int index) {
+            return BookTile(
+              book: store[index],
+              onTapped: (book) => onTapped(book),
+              onSwipeLeft: (book) => deleteBook(context, book),
+            );
+          },
+        );
+      },
+    );
+  }
+}
 
 class BookTile extends StatelessWidget {
   final google_books.VolumeVolumeInfo book;
@@ -58,111 +145,5 @@ class BookTile extends StatelessWidget {
         ),
       );
     }
-  }
-}
-
-class BooksPage extends StatefulWidget {
-  BooksPage();
-
-  @override
-  _BooksPageState createState() => _BooksPageState();
-}
-
-class _BooksPageState extends State<BooksPage> {
-  SharedPreferences prefs;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Books'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Manually add a book ISBN',
-            onPressed: () {
-              final parentState =
-                  context.findAncestorStateOfType<BarcoderAppState>();
-
-              parentState.setState(
-                () {
-                  parentState.isAddingBarcode = true;
-                },
-              );
-            },
-          )
-        ],
-      ),
-      body: BooksList(
-        onTapped: (book) {
-          print('Clicked ${book.title}');
-
-          final parentState =
-              context.findAncestorStateOfType<BarcoderAppState>();
-
-          parentState.setState(
-            () {
-              parentState.selectedBook = book;
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.qr_code_scanner),
-        onPressed: (() {
-          final parentState =
-              context.findAncestorStateOfType<BarcoderAppState>();
-
-          parentState.setState(
-            () {
-              parentState.isScanning = true;
-            },
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class BooksList extends StatelessWidget {
-  final ValueChanged<google_books.VolumeVolumeInfo> onTapped;
-
-  BooksList({@required this.onTapped});
-
-  void deleteBook(BuildContext context, google_books.VolumeVolumeInfo book) {
-    Provider.of<BookshelfModel>(context, listen: false).removeBook(book);
-
-    // TODO: Add undo action
-
-    // This only works on the latest bits (e.g. `beta` channel). If you're using
-    // Flutter 1.22 or lower (e.g. `stable` channel), you'll need to replace
-    // `ScaffoldMessenger` with `Scaffold` below for this code to successfully
-    // compile.
-    //
-    // For more information on this breaking change, see:
-    // https://flutter.dev/docs/release/breaking-changes/scaffold-messenger
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${book.title} deleted.')));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('bookslist.build()');
-    return Consumer<BookshelfModel>(
-      builder: (context, store, child) {
-        print('store.length is ${store.length()}');
-        // return Text(store.first.title);
-        return ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: store.length(),
-            itemBuilder: (BuildContext context, int index) {
-              return BookTile(
-                book: store[index],
-                onTapped: (book) => onTapped(book),
-                onSwipeLeft: (book) => deleteBook(context, book),
-              );
-            });
-      },
-    );
   }
 }
